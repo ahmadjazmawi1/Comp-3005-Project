@@ -105,4 +105,55 @@ CREATE TABLE Health_Metrics (
     FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
 );
 
+CREATE TABLE Payment1 (
+    PaymentID INT PRIMARY KEY,
+    LoyaltyID INT PRIMARY KEY,
+    pointsEarned INT NOT NULL,
+    pointsRedeemed INT NOT NULL,
+    FOREIGN KEY (LoyaltyID) REFERENCES Loyalty_Points (LoyaltyID)
+);
 
+CREATE TABLE Payment2 (
+    PaymentID INT PRIMARY KEY,
+    BillingID INT NOT NULL,
+    PaymentDate2      Date NOT NULL
+    FOREIGN KEY (BillingID) REFERENCES Billing1 (BillingID)
+);
+
+CREATE TABLE Payment3 (
+    BillingID INT PRIMARY KEY,
+    StaffID,  INT NOT NULL
+    MemberID, INT NOT NULL
+    PaymentDescription3 TEXT
+    FOREIGN KEY (BillingID) REFERENCES Billing1 (BillingID)
+    FOREIGN KEY (StaffID) REFERENCES Staff (StaffID)
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+
+CREATE TABLE Billing1 (
+    BillingID INT PRIMARY KEY,
+    Amount INT NOT NULL, 
+    Billing1Date DATE NOT NULL,
+    Billing1Description TEXT,
+    BillingType TEXT NOT NULL,
+    Billing1Status INT NOT NULL,
+    EventID INT NOT NULL,
+    SessionID INT NOT NULL,
+    FOREIGN KEY (EventID) REFERENCES Event (EventID)
+    FOREIGN KEY (SessionID) REFERENCES TrainingSessions (SessionID)
+);
+
+CREATE TABLE Billing2 (
+    EventID INT PRIMARY KEY,
+    StaffID INT NOT NULL
+    FOREIGN KEY (EventID) REFERENCES Event (EventID)
+    FOREIGN KEY (StaffID) REFERENCES Staff (StaffID)
+);
+
+CREATE TABLE Billing3 (
+    SessionID INT PRIMARY KEY,
+    MemberID INT NOT NULL
+    FOREIGN KEY (StaffID) REFERENCES Staff (StaffID)
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
