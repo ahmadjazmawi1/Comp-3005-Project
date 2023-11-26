@@ -82,10 +82,14 @@ CREATE TABLE GroupFitness(
 )INHERITS (Event);
 
 
-CREATE TABLE workshop (
+CREATE TABLE Workshop (
     WorkshopName VARCHAR(255) NOT NULL,
 
-)
+)INHERITS (Event);
+
+CREATE TABLE OtherEvent (
+	EventName VARCHAR(255) NOT NULL
+)INHERITS (Event);
 
 CREATE TABLE Exercise_Routine (
     MemberID INT PRIMARY KEY,
@@ -156,4 +160,61 @@ CREATE TABLE Billing3 (
     MemberID INT NOT NULL
     FOREIGN KEY (StaffID) REFERENCES Staff (StaffID)
     FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+CREATE TABLE Exercise_Routine (
+    MemberID INT PRIMARY KEY,
+    Exercise_Routine TEXT NOT NULL,
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+CREATE TABLE Fitness_Goals (
+    MemberID INT PRIMARY KEY,
+    Fitness_Goals TEXT NOT NULL,
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+CREATE TABLE Health_Metrics (
+    MemberID INT PRIMARY KEY,
+    Health_Metrics TEXT NOT NULL,
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+CREATE TABLE ViewsProfile (
+    MemberID INT NOT NULL,
+    TrainerID INT NOT NULL,
+    Primary KEY (MemberID, TrainerID),
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID),
+    FOREIGN KEY (TrainerID) REFERENCES Trainers (TrainerID)
+);
+
+CREATE TABLE ScheduleEvent (
+    MemberID INT NOT NULL,
+    EventID INT NOT NULL,
+    PRIMARY KEY (MemberID, EventID),
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID),
+    FOREIGN KEY (EventID) REFERENCES Event (EventID)
+);
+
+CREATE TABLE FitnessEquipmentMaintenance (
+    MaintenanceID SERIAL PRIMARY KEY,
+    EquipmentName VARCHAR(255) NOT NULL,
+    MaintenanceDate DATE NOT NULL,
+    MaintenanceDescription TEXT NOT NULL,
+    StaffID INT NOT NULL,
+    FOREIGN KEY (StaffID) REFERENCES AdminStaff (StaffID)
+);
+
+CREATE TABLE QualityAssurance (
+    QAID SERIAL PRIMARY KEY,
+    Evaluation TEXT NOT NULL,
+    Feedback TEXT NOT NULL,
+    StaffID INT NOT NULL, 
+    FOREIGN KEY (StaffID) REFERENCES AdminStaff (StaffID)
+);
+
+CREATE TABLE Loyalty_points (
+    LoyaltyID SERIAL PRIMARY KEY,
+    numPoints INT NOT NULL,
+    MemberID INT NOT NULL
 );
