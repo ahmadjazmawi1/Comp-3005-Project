@@ -16,7 +16,6 @@ CREATE TABLE Members (
 
 
 );
-
 CREATE TABLE Trainers (
     TrainerID Serial PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -83,7 +82,7 @@ CREATE TABLE GroupFitness(
 
 
 CREATE TABLE Workshop (
-    WorkshopName VARCHAR(255) NOT NULL,
+    WorkshopName VARCHAR(255) NOT NULL
 
 )INHERITS (Event);
 
@@ -109,32 +108,6 @@ CREATE TABLE Health_Metrics (
     FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
 );
 
-CREATE TABLE Payment1 (
-    PaymentID INT PRIMARY KEY,
-    LoyaltyID INT PRIMARY KEY,
-    pointsEarned INT NOT NULL,
-    pointsRedeemed INT NOT NULL,
-    FOREIGN KEY (LoyaltyID) REFERENCES Loyalty_Points (LoyaltyID)
-);
-
-CREATE TABLE Payment2 (
-    PaymentID INT PRIMARY KEY,
-    BillingID INT NOT NULL,
-    PaymentDate2      Date NOT NULL
-    FOREIGN KEY (BillingID) REFERENCES Billing1 (BillingID)
-);
-
-CREATE TABLE Payment3 (
-    BillingID INT PRIMARY KEY,
-    StaffID,  INT NOT NULL
-    MemberID, INT NOT NULL
-    PaymentDescription3 TEXT
-    FOREIGN KEY (BillingID) REFERENCES Billing1 (BillingID)
-    FOREIGN KEY (StaffID) REFERENCES Staff (StaffID)
-    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
-);
-
-
 CREATE TABLE Billing1 (
     BillingID INT PRIMARY KEY,
     Amount INT NOT NULL, 
@@ -144,41 +117,61 @@ CREATE TABLE Billing1 (
     Billing1Status INT NOT NULL,
     EventID INT NOT NULL,
     SessionID INT NOT NULL,
-    FOREIGN KEY (EventID) REFERENCES Event (EventID)
+    FOREIGN KEY (EventID) REFERENCES Event (EventID),
     FOREIGN KEY (SessionID) REFERENCES TrainingSessions (SessionID)
 );
 
+CREATE TABLE Loyalty_Points (
+    LoyaltyID SERIAL PRIMARY KEY,
+    numPoints INT NOT NULL,
+    MemberID INT NOT NULL,
+	FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+CREATE TABLE Payment1 (
+    PaymentID INT NOT NULL,
+    LoyaltyID INT NOT NULL,
+    pointsEarned INT NOT NULL,
+    pointsRedeemed INT NOT NULL,
+	PRIMARY KEY (PaymentID, LoyaltyID),
+    FOREIGN KEY (LoyaltyID) REFERENCES Loyalty_Points (LoyaltyID)
+);
+
+CREATE TABLE Payment2 (
+    PaymentID INT PRIMARY KEY,
+    BillingID INT NOT NULL,
+    PaymentDate2      Date NOT NULL,
+    FOREIGN KEY (BillingID) REFERENCES Billing1 (BillingID)
+);
+
+CREATE TABLE Payment3 (
+    BillingID INT PRIMARY KEY,
+    StaffID  INT NOT NULL,
+    MemberID INT NOT NULL,
+    PaymentDescription3 TEXT,
+    FOREIGN KEY (BillingID) REFERENCES Billing1 (BillingID),
+    FOREIGN KEY (StaffID) REFERENCES AdminStaff (StaffID),
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+
+
+
 CREATE TABLE Billing2 (
     EventID INT PRIMARY KEY,
-    StaffID INT NOT NULL
-    FOREIGN KEY (EventID) REFERENCES Event (EventID)
-    FOREIGN KEY (StaffID) REFERENCES Staff (StaffID)
+    StaffID INT NOT NULL,
+    FOREIGN KEY (EventID) REFERENCES Event (EventID),
+    FOREIGN KEY (StaffID) REFERENCES AdminStaff (StaffID)
 );
 
 CREATE TABLE Billing3 (
     SessionID INT PRIMARY KEY,
-    MemberID INT NOT NULL
-    FOREIGN KEY (StaffID) REFERENCES Staff (StaffID)
+    MemberID INT NOT NULL,
+	StaffID INT NOT NULL,
+    FOREIGN KEY (StaffID) REFERENCES AdminStaff (StaffID),
     FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
 );
 
-CREATE TABLE Exercise_Routine (
-    MemberID INT PRIMARY KEY,
-    Exercise_Routine TEXT NOT NULL,
-    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
-);
-
-CREATE TABLE Fitness_Goals (
-    MemberID INT PRIMARY KEY,
-    Fitness_Goals TEXT NOT NULL,
-    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
-);
-
-CREATE TABLE Health_Metrics (
-    MemberID INT PRIMARY KEY,
-    Health_Metrics TEXT NOT NULL,
-    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
-);
 
 CREATE TABLE ViewsProfile (
     MemberID INT NOT NULL,
@@ -196,13 +189,14 @@ CREATE TABLE ScheduleEvent (
     FOREIGN KEY (EventID) REFERENCES Event (EventID)
 );
 
-CREATE TABLE FitnessEquipmentMaintenance (
+CREATE TABLE FitnessEquipmentMaintenance(
     MaintenanceID SERIAL PRIMARY KEY,
     EquipmentName VARCHAR(255) NOT NULL,
     MaintenanceDate DATE NOT NULL,
     MaintenanceDescription TEXT NOT NULL,
     StaffID INT NOT NULL,
     FOREIGN KEY (StaffID) REFERENCES AdminStaff (StaffID)
+
 );
 
 CREATE TABLE QualityAssurance (
@@ -211,10 +205,4 @@ CREATE TABLE QualityAssurance (
     Feedback TEXT NOT NULL,
     StaffID INT NOT NULL, 
     FOREIGN KEY (StaffID) REFERENCES AdminStaff (StaffID)
-);
-
-CREATE TABLE Loyalty_points (
-    LoyaltyID SERIAL PRIMARY KEY,
-    numPoints INT NOT NULL,
-    MemberID INT NOT NULL
 );
