@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 require ('pug');
 const app = express();
 const port = 3000;
+const pg = require('pg');
 
 var conString = "postgres://vasmuvxx:qXEbAFACkOoUYUyqq3lTowTWP_WDxj70@berry.db.elephantsql.com/vasmuvxx" //Can be found in the Details page
 var pool = new pg.Client(conString);
@@ -26,6 +27,11 @@ pool.connect(function(err) {
 app.set('view engine', 'pug');
 app.use(express.static('public'));
 
+app.get('/',  async (req, res) => {
+    
+    res.render('main' );
+    
+  });
 
 
 app.listen(port, () => {

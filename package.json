@@ -1,0 +1,25 @@
+{
+  "name": "comp-3005-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmadjazmawi1/Comp-3005-Project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ahmadjazmawi1/Comp-3005-Project/issues"
+  },
+  "homepage": "https://github.com/ahmadjazmawi1/Comp-3005-Project#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "pug": "^3.0.2"
+  }
+}
