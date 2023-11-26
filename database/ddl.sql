@@ -87,4 +87,22 @@ CREATE TABLE workshop (
 
 )
 
+CREATE TABLE Exercise_Routine (
+    MemberID INT PRIMARY KEY,
+    Exercise_Routine TEXT NOT NULL,
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+CREATE TABLE Fitness_Goals (
+    MemberID INT PRIMARY KEY,
+    Fitness_Goals TEXT NOT NULL,
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
+CREATE TABLE Health_Metrics (
+    MemberID INT PRIMARY KEY,
+    Health_Metrics TEXT NOT NULL,
+    FOREIGN KEY (MemberID) REFERENCES Members (MemberID)
+);
+
 
