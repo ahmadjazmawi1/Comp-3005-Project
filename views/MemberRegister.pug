@@ -1,0 +1,44 @@
+html
+  head
+    title Register
+
+  body
+    h1 Register
+
+    form(action='/register' method='post')
+      label(for='username') Username:
+      input(type='text' name='username' required)
+
+      label(for='password') Password:
+      input(type='password' name='password' required)
+
+      label(for='fname') First Name:
+      input(type='text' name='fname' required)
+
+      label(for='lname') Last Name:
+      input(type='text' name='lname' required)
+
+      label(for='email') Email:
+      input(type='email' name='email' required)
+
+      label(for='street') Street:
+      input(type='text' name='street' required)
+
+      label(for='pcode') Postal Code:
+      input(type='text' name='pcode' required)
+
+      label(for='homenum') Home Number:
+      input(type='text' name='homenum' required)
+
+      label(for='gender') Gender:
+      input(type='text' name='gender' required)
+
+      label(for='dob') Date of Birth:
+      input(type='date' name='dob' required)
+
+      label(for='phonenumber') Phone Number:
+      input(type='tel' name='phonenumber' required)
+
+      input(type='submit' value='Register')
+
+    a(href='/') Back to Main Page
