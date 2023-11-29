@@ -57,12 +57,11 @@ CREATE TABLE Room (
 
 CREATE TABLE Event (
     EventID Serial PRIMARY KEY,
-    EventName VARCHAR(255),
 	StaffID Int NOT NULL,
 	RoomNumber INT NOT NULL,
 	TrainerID INT NOT NULL,
     EventDate DATE NOT NULL,
-    EventTime DATE NOT NULL,
+    EventTime TIME NOT NULL,
     EventDuration Time NOT NULL,
     EventType VARCHAR(255),
 	

@@ -1,0 +1,57 @@
+html
+  head
+    title Welcome 
+  body
+    p1 WELCOME MAN
+    style.
+      table {
+        border-collapse: collapse;
+        
+      }
+
+      th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+    h1 Trainer Profile
+    if Trainer
+        p Welcome, #{Trainer.fname} #{Trainer.lname}
+    
+    if Sessions
+        h2 Trainer Schedule
+        table(style="float: left; margin-right: 20px;")
+          caption Training Sessions
+          tr
+            th Member
+            th Date 
+            th Time
+            th Duration
+          each sess in Sessions
+            tr
+              td= sess.memberid
+              td= sess.sessiondate
+              td= sess.sessiontime
+              td= sess.duration
+        
+        // Second Table
+        table(style="float: left;")
+          caption Events
+          tr
+            th Event type 
+            th Date 
+            th Time 
+            th Duration 
+            th Room
+
+            
+          each ev in Events
+            tr
+              td= ev.eventtype
+              td= ev.eventdate 
+              td= ev.eventtime 
+              td= ev.eventduration
+              td= ev.roomnum
+
+    

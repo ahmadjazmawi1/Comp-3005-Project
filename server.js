@@ -37,13 +37,46 @@ app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.render('main');
   });
+
+async function RegisterMember(username, password, fname, lname, email, street, pcode, homenum, gender, dob, phonenumber){
+    return await pool.query('INSERT INTO Members (username, password, Fname, Lname, Email, Street, PCode, HomeNum, Gender, DOB, PhoneNumber, JoinDate) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_DATE)',
+    [username, password, fname, lname, email, street, pcode, homenum, gender, dob, phonenumber])
+    .catch(error => {
+        console.error('Error executing query:', error);
+        throw error; // rethrow the error to be caught in the calling function
+    });
+   
+}
+
+// Route for handling registration form submission
+app.post('/MemberRegister', async (req, res) => {
+    //parsing the values entered in text boxes in the registration page into variables
+    const { username, password, fname, lname, email, street, pcode, homenum, gender, dob, phonenumber } = req.body;
+    try {
+        // Insert user details into the Members table
+        await RegisterMember(username, password, fname, lname, email, street, pcode, homenum, gender, dob, phonenumber);
+        // Retrieve the newly registered member
+        const result = await LoginMember(username, password);
+        //have to check if the user registered an account with a username not found in the database by seeing if result>0
+        if (result.rowCount > 0) {
+            // Redirect to the member profile page and pass the Member object to use it in pug file
+            res.render('memberProfile', { Member: result.rows[0] });
+        } else {
+            console.log('Error retrieving registered user information');
+        }
+    } catch (error) {
+        console.error('Error registering user:', error);
+        // Handle the error appropriately
+    }
+});
+
 // Route for the members page
 app.get('/MemberLogin', (req, res) => {
     res.render('MemberLogin');
 });
 
 async function LoginMember(username, password){
-    console.log("username " + username + " password " + password);
+    
     return await pool.query('SELECT * FROM Members WHERE username = $1 AND password = $2', [username, password])
     .catch(error => {
         console.error('Error executing query:', error);
@@ -52,20 +85,17 @@ async function LoginMember(username, password){
    
 }
   // Route for handling login form submission
-app.post('/login', async (req, res) => {
+app.post('/MemberLogin', async (req, res) => {
     
     const { username, password } = req.body;
   
    try{
-    console.log('Before LoginMember');
     let result = await LoginMember(username, password);
-    
-    console.log('After LoginMember');
+    //check if the user entered valid credentials by checking if the result returned by the SELECT query contains data
+    //check if length of result >0
     if (result.rowCount >0){
-        console.dir(result.rows, { depth: null });
-        console.log("Fname: " + result.rows[0].fname);
-        console.log("Lname: " + result.rows[0].Lname);
-        console.log('Redirecting to /MemberProfile');
+        
+        //if credentials are valid, it renders the Member profile pug page and gives it the Member data
         res.render('MemberProfile', {Member: result.rows[0]});
     }
     else{
@@ -84,32 +114,78 @@ app.get('/MemberRegister', (req, res) => {
     res.render('MemberRegister'); 
 });
 
-async function RegisterMember(username, password, fname, lname, email, street, pcode, homenum, gender, dob, phonenumber){
-    return await pool.query('INSERT INTO Members (username, password, Fname, Lname, Email, Street, PCode, HomeNum, Gender, DOB, PhoneNumber, JoinDate) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_DATE)',
-    [username, password, fname, lname, email, street, pcode, homenum, gender, dob, phonenumber])
+// Route for the members page
+app.get('/TrainerLogin', (req, res) => {
+    res.render('TrainerLogin');
+});
+
+async function LoginTrainer(username, password){
+    
+    return await pool.query('SELECT * FROM Trainers WHERE username = $1 AND password = $2', [username, password])
     .catch(error => {
         console.error('Error executing query:', error);
         throw error; // rethrow the error to be caught in the calling function
     });
    
 }
-  // Route for handling registration form submission
-app.post('/register', async (req, res) => {
-   
-   
-    const { username, password, fname, lname, email, street, pcode, homenum, gender, dob, phonenumber } = req.body;
-    // Insert user details into the Members table
+
+async function getTrainerSessions(TrainerID){
     try {
-        await RegisterMember(username, password, fname, lname, email, street, pcode, homenum, gender, dob, phonenumber);
-        console.log('User registered successfully');
-        //res.render('MemberProfile', {Member: })
+        const result = await pool.query('SELECT * FROM TrainingSessions WHERE trainerid = $1 ORDER BY SessionDate, SessionTime DESC', [TrainerID]);
         
-        res.render('MemberProfile');
+        return result.rows;
     } catch (error) {
-        console.error('Error registering user:', error);
-       
+        
+        throw error; // rethrow the error to be caught in the calling function
     }
+}
+
+async function getTrainerEvents(TrainerID){
+    try {
+        const result = await pool.query('SELECT * FROM Event WHERE trainerid = $1 ORDER BY EventDate, EventTime DESC', [TrainerID]);
+        return result.rows;
+    } catch (error) {
+        console.error('Error executing query:', error);
+        throw error; // rethrow the error to be caught in the calling function
+    }
+}
+
+
+
+
+  // Route for handling login form submission
+app.post('/Trainerlogin', async (req, res) => {
+    
+    const { username, password } = req.body;
+
+   try{
+
+    let result = await LoginTrainer(username, password);
+    
+    let TrainingSessions = await getTrainerSessions(result.rows[0].trainerid);
+    let events = await getTrainerEvents(result.rows[0].trainerid);
+
+    //check if the user entered valid credentials by checking if the result returned by the SELECT query contains data
+    //check if length of result >0
+    if (result.rowCount >0){
+        //if credentials are valid, it renders the Trainer profile pug page and gives it the Trainer data
+        res.render('TrainerProfile', {Trainer: result.rows[0], Sessions: TrainingSessions, Events: events});
+    }
+    else{
+        console.log('Login credentials are incorrect');
+        res.render('TrainerLogin', {ErrorMessage: 'Login credentials are incorrect'});
+        
+    }
+   }catch(error){
+
+   }
+    
 });
+  
+
+
+
+
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -118,4 +194,4 @@ process.on('unhandledRejection', (reason, promise) => {
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
-  });
+});
