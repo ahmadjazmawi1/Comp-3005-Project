@@ -140,6 +140,32 @@ async function getTrainerSessions(TrainerID){
     }
 }
 
+//function to get the training sessions that are completed. 
+//A session is completed if the current date and time is >= the sessions date, time, duration
+async function getCompletedSessions(TrainerID){
+    try {
+         
+        result = await pool.query('SELECT * FROM TrainingSessions WHERE trainerid = $1 AND (SELECT current_date) + (SELECT current_time) >= sessiondate + sessiontime + duration', [TrainerID]);
+        console.log(result.rows[0]);
+        return result.rows;
+    } catch (error) {
+        
+        throw error; // rethrow the error to be caught in the calling function
+    }
+}
+
+async function addProgressNotes(TrainerID, SessionID, ProgressNotes){
+    try {
+         
+        result = await pool.query('UPDATE TrainingSessions SET progressNotes = COALESCE(progressNotes, $1) WHERE sessionID = $2 AND trainerID = $3 AND (SELECT current_date) + (SELECT current_time) >= (sessionDate + sessionTime + duration) AND progressNotes IS NULL', [ProgressNotes, SessionID, TrainerID]);
+        console.log(result.rows[0]);
+        return result.rows;
+    } catch (error) {
+        
+        throw error; // rethrow the error to be caught in the calling function
+    }
+    
+}
 async function getTrainerEvents(TrainerID){
     try {
         const result = await pool.query('SELECT * FROM Event WHERE trainerid = $1 ORDER BY EventDate, EventTime DESC', [TrainerID]);
@@ -150,7 +176,25 @@ async function getTrainerEvents(TrainerID){
     }
 }
 
+app.post('/addProgressNotes', async (req, res) => {
+    const { SessionID, progressNotes, TrainerID } = req.body;
 
+    try {
+        // Call the function to update progress notes
+        await addProgressNotes(TrainerID, SessionID, progressNotes);
+
+        // Redirect back to the TrainerProfile page with updated data
+        let TrainingSessions = await getTrainerSessions(TrainerID);
+        let events = await getTrainerEvents(TrainerID);
+        let completedSess = await getCompletedSessions(TrainerID);
+
+        res.render('TrainerProfile', { Trainer: { trainerid: TrainerID }, Sessions: TrainingSessions, Events: events, completedSess: completedSess });
+    } catch (error) {
+        console.error('Error adding progress notes:', error);
+        // Handle the error appropriately
+        res.render('errorPage', { ErrorMessage: 'Error adding progress notes' });
+    }
+});
 
 
   // Route for handling login form submission
@@ -164,12 +208,13 @@ app.post('/Trainerlogin', async (req, res) => {
     
     let TrainingSessions = await getTrainerSessions(result.rows[0].trainerid);
     let events = await getTrainerEvents(result.rows[0].trainerid);
-
+    let completedSess = await getCompletedSessions(result.rows[0].trainerid);
+    
     //check if the user entered valid credentials by checking if the result returned by the SELECT query contains data
     //check if length of result >0
     if (result.rowCount >0){
         //if credentials are valid, it renders the Trainer profile pug page and gives it the Trainer data
-        res.render('TrainerProfile', {Trainer: result.rows[0], Sessions: TrainingSessions, Events: events});
+        res.render('TrainerProfile', {Trainer: result.rows[0], Sessions: TrainingSessions, Events: events, completedSess: completedSess});
     }
     else{
         console.log('Login credentials are incorrect');

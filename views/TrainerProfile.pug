@@ -6,7 +6,7 @@ html
     style.
       table {
         border-collapse: collapse;
-        
+        margin-bottom: 100px;
       }
 
       th, td {
@@ -21,6 +21,8 @@ html
     
     if Sessions
         h2 Trainer Schedule
+
+        //- First Table
         table(style="float: left; margin-right: 20px;")
           caption Training Sessions
           tr
@@ -34,9 +36,10 @@ html
               td= sess.sessiondate
               td= sess.sessiontime
               td= sess.duration
-        
-        // Second Table
-        table(style="float: left;")
+        br
+
+        //- Second Table
+        table(style="float: left; margin-right: 20px;")
           caption Events
           tr
             th Event type 
@@ -44,14 +47,37 @@ html
             th Time 
             th Duration 
             th Room
-
-            
           each ev in Events
             tr
               td= ev.eventtype
               td= ev.eventdate 
               td= ev.eventtime 
               td= ev.eventduration
-              td= ev.roomnum
+              td= ev.roomnumber
+        br
 
-    
+        //- Third Table
+        table
+          caption Completed Training Sessions
+          tr
+            th Member
+            th Date 
+            th Time
+            th Duration
+            th Progress Notes
+          each compsess in completedSess
+            tr
+              td= compsess.memberid
+              td= compsess.sessiondate
+              td= compsess.sessiontime
+              td= compsess.duration        
+              td= compsess.progressnotes
+        form(action='/addProgressNotes' method='post')
+          label(for='SessionID') Session ID:
+          input(type='text' name='SessionID' required)
+
+          label(for='progressNotes') Progress Notes:
+          input(type='text' name='progressNotes' required)
+          input(type='hidden' name='TrainerID' value=Trainer.trainerid)
+          input(type='submit' value='Add Progress Notes')
+
