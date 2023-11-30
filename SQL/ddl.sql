@@ -37,6 +37,7 @@ CREATE TABLE TrainingSessions (
     ProgressNotes TEXT, -- can be null, for ex before the session takes place
     Foreign key (MemberID) references Members (MemberID),     --id of the Member that is training
    	Foreign key (TrainerID) references Trainers (TrainerID)  -- id of the trainer that is teaching the session
+    CONSTRAINT unique_room_date_time UNIQUE (TrainerID, SessiontDate, SessionTime)--we need the combination of Date, Time, 
 
 );
 
