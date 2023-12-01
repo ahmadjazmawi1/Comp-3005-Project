@@ -1,0 +1,60 @@
+html
+  head
+    title Welcome 
+  body
+    div(style="text-align: right; padding: 10px;")
+      a(href='/') Home
+    p1 WELCOME Staff
+    style.
+      table {
+        border-collapse: collapse;
+        margin-bottom: 200px;
+      }
+
+      th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+    h1 AdminStaff Profile
+    if AdminStaff
+        p Welcome, #{AdminStaff.fname} #{AdminStaff.lname}
+
+    if EquipmentMaintenance
+        h2 EquipmentMaintenance Table
+
+        //- First Table
+        table(style="margin-bottom: 10px;")
+          caption EquipmentMaintenance Table
+          tr
+            th MaintenanceID
+            th EquipmentName 
+            th MaintenanceDate
+            th MaintenanceDescription
+            th StaffID
+          each eq in EquipmentMaintenance
+            tr
+              td= eq.maintenanceid
+              td= eq.equipmentname
+              td= eq.maintenancedate
+              td= eq.maintenancedescription
+              td= eq.staffid
+
+            br
+        br
+        br
+
+        form(action='/EquipmentMaintenance' method='post')
+          label(for='MaintenanceID') Maintenance ID:
+          input(type='text' name='MaintenanceID' required)
+
+          label(for='MaintenanceDate') Maintenance Date:
+          input(type='date' name='MaintenanceDate' required)
+          label(for='MaintenanceDescription') Maintenance Description:
+          input(type='text' name='MaintenanceDescription' required)
+          input(type='hidden' name='StaffID' value=AdminStaff.staffid)
+          input(type='submit' value='Add Maintenace update')
+        br
+        br
+        br
