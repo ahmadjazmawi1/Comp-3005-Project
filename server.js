@@ -174,6 +174,94 @@ async function LoginTrainer(username, password){
    
 }
 
+app.get('/AdminStaffLogin', (req, res) => {
+    res.render('AdminStaffLogin');
+});
+
+async function LoginAdminStaff(username, password){
+    
+    return await pool.query('SELECT * FROM AdminStaff WHERE username = $1 AND password = $2', [username, password])
+    .catch(error => {
+        console.error('Error executing query:', error);
+        throw error; // rethrow the error to be caught in the calling function
+    });
+   
+}
+
+async function getEquipmentMaintenance(){
+    try {
+        const result = await pool.query('SELECT * FROM FitnessEquipmentMaintenance');
+        
+        return result.rows;
+    } catch (error) {
+        
+        throw error; // rethrow the error to be caught in the calling function
+    }
+}
+
+async function EquipmentMaintenance(MaintenanceID,MaintenanceDate,MaintenanceDescription){
+    try {
+         
+        result = await pool.query('UPDATE FitnessEquipmentMaintenance SET MaintenanceID = $1, MaintenanceDate = $2, MaintenanceDescription = $3 WHERE MaintenanceID = $1  ', [MaintenanceID,MaintenanceDate,MaintenanceDescription]);
+        console.log(result.rows[0]);
+        return result.rows;
+    } catch (error) {
+        
+        throw error; // rethrow the error to be caught in the calling function
+    }
+    
+}
+
+app.post('/EquipmentMaintenance', async (req, res) => {
+    const { MaintenanceID, MaintenanceDate, MaintenanceDescription } = req.body;
+    
+    try {
+        // Call EquipmentMaintenance first
+        await EquipmentMaintenance(MaintenanceID, MaintenanceDate, MaintenanceDescription);
+
+        // Now you can call other asynchronous functions
+        //let result = await LoginAdminStaff(username, password);
+        res.render('AdminStaffLogin', {ErrorMessage: ''});
+
+       
+    } catch (error) {
+        // Handle errors appropriately
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+  // Route for handling login form submission
+  app.post('/AdminStaffLogin', async (req, res) => {
+    
+    const { username, password } = req.body;
+
+   try{
+
+    let result = await LoginAdminStaff(username, password);
+    
+    let EquipmentMaintenance = await getEquipmentMaintenance();
+    //check if the user entered valid credentials by checking if the result returned by the SELECT query contains data
+    //check if length of result >0
+    if (result.rowCount >0){
+        req.session.userType = 'AdminStaff';
+        req.session.userId = result.rows[0].StaffID;
+        //if credentials are valid, it renders the Trainer profile pug page and gives it the Trainer data
+        res.render('AdminStaffProfile', {AdminStaff: result.rows[0], EquipmentMaintenance: EquipmentMaintenance});
+    }
+    else{
+        console.log('Login credentials are incorrect');
+        res.render('AdminStaffLogin', {ErrorMessage: 'Login credentials are incorrect'});
+        
+    }
+   }catch(error){
+
+   }
+    
+});
+
+
+
+
 async function getTrainerSessions(TrainerID){
     try {
         const result = await pool.query('SELECT * FROM TrainingSessions WHERE trainerid = $1 ORDER BY SessionDate, SessionTime DESC', [TrainerID]);
@@ -287,6 +375,8 @@ app.post('/Trainerlogin', async (req, res) => {
    }
     
 });
+
+
   
 
 
