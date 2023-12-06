@@ -4,7 +4,7 @@ html
   body
     div(style="text-align: right; padding: 10px;")
       a(href='/') Home
-    p1 WELCOME MAN
+   
     style.
       table {
         border-collapse: collapse;
@@ -26,14 +26,16 @@ html
 
         //- First Table
         table(style="margin-bottom: 10px;")
-          caption Training Sessions
+          caption Upcoming Training Sessions
           tr
+            th Session
             th Member
             th Date 
             th Time
             th Duration
           each sess in Sessions
             tr
+              td= sess.sessionid 
               td= sess.memberid
               td= sess.sessiondate
               td= sess.sessiontime
@@ -99,3 +101,24 @@ html
             tr
               td
                 a(href='/MemberProfile/' + member.memberid)= member.fname + ' ' + member.lname
+
+h1 Upcoming Training Sessions
+if UpcomingSessions && UpcomingSessions.length > 0
+  table
+    thead
+      tr
+        th Session ID
+        th Member ID
+        th Session Date
+        th Session Time
+        th Duration
+    tbody
+      each session in upcomingSessions
+        tr
+          td #{session.sessionID}
+          td #{session.MemberID}
+          td #{session.SessionDate.toLocaleDateString()}
+          td #{session.SessionTime}
+          td #{session.Duration}
+else
+  p No upcoming training sessions.
