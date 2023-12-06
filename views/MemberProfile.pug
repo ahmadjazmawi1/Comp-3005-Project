@@ -12,3 +12,49 @@ html
     else
         p No member information available
         
+
+
+h2 Available Training Sessions
+if AvailableSessions 
+  table
+    thead
+      tr
+        th Session ID
+        th Trainer ID
+        th Session Date
+        th Session Time
+        th Duration
+    tbody
+      each session in AvailableSessions
+        tr
+          td #{session.sessionid}
+          td #{session.trainerid}
+          td #{session.sessiondate}
+          td #{session.sessiontime}
+          td #{session.duration} minutes
+
+
+h2 Schedule a Training Session
+form(action='/scheduleTrainingSession' method='post')
+  input(type='hidden' name='memberID' value=Member.memberid)
+  label(for='sessionID') Enter Session ID:
+  input(type='text' name='sessionID' required)
+  label(for='trainerID') Enter Trainer ID:
+  input(type='text' name='trainerID' required)
+  button(type='submit') Schedule Session
+
+h2 Reschedule Your Training Session
+form(action='/rescheduleTrainingSession' method='post')
+  input(type='hidden' name='memberID' value=Member.memberid)
+  label(for='currentSessionID') Current Session ID:
+  input(type='text' name='currentSessionID' required)
+  label(for='newSessionID') New Session ID:
+  input(type='text' name='newSessionID' required)
+  button(type='submit') Reschedule Session
+
+h2 Cancel Your Training Session
+form(action='/cancelTrainingSession' method='post')
+  input(type='hidden' name='memberID' value=Member.memberid)
+  label(for='sessionID') Enter Session ID to cancel:
+  input(type='text' name='sessionID' required)
+  button(type='submit') Cancel Session
