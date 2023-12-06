@@ -17,5 +17,14 @@ Type "npm express-session"
 Type “npm install”
 Type “npm start”
 
+For the diagrams for 2.1 to 2.4, 
+
+The folder called 2.1-2.4 contains the diagram for Conceptual Design, Reduction to Relation Schemas, Normalization of Relation Schemas, Database Schema Diagram. Normalization, explanation of design, and assumptions are in the 3005_Project_report pdf file.
+
+The folder called SQL contains the ddl and dml statements. dml statements have more than 10 queries to test the tables.
+
+
+The pug files located in the Views folder are for the user interface
+Server.js contains the code that communicates with the database and the UI
 
 
