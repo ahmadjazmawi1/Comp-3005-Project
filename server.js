@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 const session = require('express-session');
 require ('pug');
 const app = express();
-const port = 3000;
+const port = 50000;
 const pg = require('pg');
 
 var conString = "postgres://vasmuvxx:qXEbAFACkOoUYUyqq3lTowTWP_WDxj70@berry.db.elephantsql.com/vasmuvxx" //Can be found in the Details page
@@ -33,9 +33,6 @@ app.use(
   );
 
 
-
-
-
 // Use body-parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -59,6 +56,73 @@ async function RegisterMember(username, password, fname, lname, email, street, p
     });
    
 }
+//get all the members, used for listing all the members on the Trainer Profile page so Trainers view member profiles
+async function getMembers(){
+    try {
+        result = await pool.query('SELECT * FROM Members');
+        
+        return result.rows;
+    } catch (error) {
+        
+        throw error; // rethrow the error to be caught in the calling function
+    }
+}
+
+async function getTrainers() {
+    try {
+        result = await pool.query('SELECT * FROM Trainers');
+        return result.rows;
+    } catch (error) {
+
+        throw error;
+    }
+}
+
+
+async function LoginMember(username, password){
+    
+    return await pool.query('SELECT * FROM Members WHERE username = $1 AND password = $2', [username, password])
+    .catch(error => {
+        console.error('Error executing query:', error);
+        throw error; // rethrow the error to be caught in the calling function
+    });
+   
+}
+
+async function getTrainerSessions(TrainerID){
+    try {
+        const result = await pool.query('SELECT * FROM TrainingSessions WHERE trainerid = $1 ORDER BY SessionDate, SessionTime DESC', [TrainerID]);
+        
+        return result.rows;
+    } catch (error) {
+        
+        throw error; // rethrow the error to be caught in the calling function
+    }
+}
+
+//function to get the training sessions that are completed. 
+//A session is completed if the current date and time is >= the sessions date, time, duration
+async function getCompletedSessions(TrainerID){
+    try {
+         
+        result = await pool.query('SELECT * FROM TrainingSessions WHERE trainerid = $1 AND (SELECT current_date) + (SELECT current_time) >= sessiondate + sessiontime + duration', [TrainerID]);
+        console.log(result.rows[0]);
+        return result.rows;
+    } catch (error) {
+        
+        throw error; // rethrow the error to be caught in the calling function
+    }
+}
+
+async function getAvailableSessions() {
+    try {
+        const result = await pool.query('SELECT * FROM TrainingSessions WHERE SessionDate >= CURRENT_DATE ORDER BY SessionDate, SessionTime');
+        return result.rows;
+    } catch (error) {
+        console.error('Error fetching available sessions:', error);
+        return []; // Return an empty array if there's an error
+    }
+}
 
 //route for Member Profile based on their ID. Currently only used when Trainers want to view Member Profiles
 app.get('/MemberProfile/:id', async (req, res) => {
@@ -72,10 +136,10 @@ app.get('/MemberProfile/:id', async (req, res) => {
             // If member found, render the member profile page
             res.render('MemberProfile', { Member: result.rows[0] });
             const trainerId = req.session.userId; 
-            await pool.query('INSERT INTO ViewsProfile (TrainerID, MemberID) VALUES ($1, $2)', [
-                trainerId,
-                memberId,
-            ]);
+            // await pool.query('INSERT INTO ViewsProfile (TrainerID, MemberID) VALUES ($1, $2)', [
+            //     trainerId,
+            //     memberId,
+            // ]);
         } else {
             // If member not found, render an error page or handle accordingly
             res.render('errorPage', { ErrorMessage: 'Member not found' });
@@ -86,6 +150,8 @@ app.get('/MemberProfile/:id', async (req, res) => {
         res.render('errorPage', { ErrorMessage: 'Error retrieving member profile' });
     }
 });
+
+
 // Route for handling registration form submission
 app.post('/MemberRegister', async (req, res) => {
     //parsing the values entered in text boxes in the registration page into variables
@@ -113,27 +179,35 @@ app.post('/MemberRegister', async (req, res) => {
     }
 });
 
+// Route to get available sessions for a trainer
+app.get('/availableSessions/:trainerID', async (req, res) => {
+    const trainerID = req.params.trainerID;
+  
+    try {
+      const sessions = await pool.query('SELECT * FROM TrainingSessions WHERE TrainerID = $1 AND SessionDate >= CURRENT_DATE', [trainerID]);
+      res.json(sessions.rows); // Send the sessions back as JSON
+    } catch (error) {
+      console.error('Error fetching available sessions:', error);
+      res.status(500).send('Server Error');
+    }
+  });
+
+
 // Route for the members page
 app.get('/MemberLogin', (req, res) => {
     res.render('MemberLogin');
 });
 
-async function LoginMember(username, password){
-    
-    return await pool.query('SELECT * FROM Members WHERE username = $1 AND password = $2', [username, password])
-    .catch(error => {
-        console.error('Error executing query:', error);
-        throw error; // rethrow the error to be caught in the calling function
-    });
-   
-}
+
   // Route for handling login form submission
-app.post('/MemberLogin', async (req, res) => {
+  app.post('/MemberLogin', async (req, res) => {
     
     const { username, password } = req.body;
     
    try{
     let result = await LoginMember(username, password);
+    let availableSessions = await getAvailableSessions();
+    let trainers = await getTrainers();
    
     //check if the user entered valid credentials by checking if the result returned by the SELECT query contains data
     //check if length of result >0
@@ -141,7 +215,7 @@ app.post('/MemberLogin', async (req, res) => {
         req.session.userType = 'Member';
         req.session.userId = result.rows[0].memberid;
         //if credentials are valid, it renders the Member profile pug page and gives it the Member data
-        res.render('MemberProfile', {Member: result.rows[0]});
+        res.render('MemberProfile', {Member: result.rows[0], Trainers: trainers, AvailableSessions: availableSessions});
     }
     else{
         console.log('Login credentials are incorrect');
@@ -260,33 +334,6 @@ app.post('/EquipmentMaintenance', async (req, res) => {
 });
 
 
-
-
-async function getTrainerSessions(TrainerID){
-    try {
-        const result = await pool.query('SELECT * FROM TrainingSessions WHERE trainerid = $1 ORDER BY SessionDate, SessionTime DESC', [TrainerID]);
-        
-        return result.rows;
-    } catch (error) {
-        
-        throw error; // rethrow the error to be caught in the calling function
-    }
-}
-
-//function to get the training sessions that are completed. 
-//A session is completed if the current date and time is >= the sessions date, time, duration
-async function getCompletedSessions(TrainerID){
-    try {
-         
-        result = await pool.query('SELECT * FROM TrainingSessions WHERE trainerid = $1 AND (SELECT current_date) + (SELECT current_time) >= sessiondate + sessiontime + duration', [TrainerID]);
-        console.log(result.rows[0]);
-        return result.rows;
-    } catch (error) {
-        
-        throw error; // rethrow the error to be caught in the calling function
-    }
-}
-
 async function addProgressNotes(TrainerID, SessionID, ProgressNotes){
     try {
          
@@ -300,17 +347,7 @@ async function addProgressNotes(TrainerID, SessionID, ProgressNotes){
     
 }
 
-//get all the members, used for listing all the members on the Trainer Profile page so Trainers view member profiles
-async function getMembers(){
-    try {
-        result = await pool.query('SELECT * FROM Members');
-        
-        return result.rows;
-    } catch (error) {
-        
-        throw error; // rethrow the error to be caught in the calling function
-    }
-}
+
 async function getTrainerEvents(TrainerID){
     try {
         const result = await pool.query('SELECT * FROM Event WHERE trainerid = $1 ORDER BY EventDate, EventTime DESC', [TrainerID]);
@@ -376,12 +413,100 @@ app.post('/Trainerlogin', async (req, res) => {
     
 });
 
+// STARTING FROM HERE ME
 
-  
+app.post('/scheduleTrainingSession', async (req, res) => {
+    const { sessionID, memberID, trainerID, sessionDate, sessionTime, duration } = req.body;
+    
+
+    try {
+        // Assume memberID is already stored in the session or passed from the client side
+        await pool.query(
+            'UPDATE TrainingSessions SET MemberID = $1 WHERE SessionID =$2', 
+            [memberID, sessionID]
+        );
+
+        console.log("inside scheduletraining try :" ,memberID, trainerID, sessionDate, sessionTime, duration)
+        
+        let availableSessions = await getAvailableSessions();
+        let trainers = await getTrainers();
+
+        res.render('MemberProfile', {Member: {memberid : memberID}, Trainers: trainers, AvailableSessions: availableSessions});
+        
+    } catch (error) {
+        console.error('Error scheduling training session:', error);
+        res.redirect(`/MemberProfile/${memberID}?scheduleError=${error.message}`);
+    }
+});
 
 
 
 
+
+app.post('/rescheduleTrainingSession', async (req, res) => {
+    const { currentSessionID, newSessionID, memberID, trainerID, sessionDate, sessionTime, duration } = req.body;
+    
+
+    try {
+        // Assume memberID is already stored in the session or passed from the client side
+        // Set the MemberID to NULL for the current session
+        await pool.query('UPDATE TrainingSessions SET MemberID = NULL WHERE SessionID = $1', [currentSessionID]);
+
+        // Set the MemberID for the new session
+        await pool.query('UPDATE TrainingSessions SET MemberID = $1 WHERE SessionID = $2', [memberID, newSessionID]);
+
+        console.log("inside scheduletraining try :" ,memberID, trainerID, sessionDate, sessionTime, duration)
+        
+        let availableSessions = await getAvailableSessions();
+        let trainers = await getTrainers();
+
+        res.render('MemberProfile', {Member: {memberid : memberID}, Trainers: trainers, AvailableSessions: availableSessions});
+        
+    } catch (error) {
+        console.error('Error scheduling training session:', error);
+        res.redirect(`/MemberProfile/${memberID}?scheduleError=${error.message}`);
+    }
+});
+
+app.post('/cancelTrainingSession', async (req, res) => {
+    const { sessionID, memberID, trainerID, sessionDate, sessionTime, duration } = req.body;
+    
+
+    try {
+        // Assume memberID is already stored in the session or passed from the client side
+        await pool.query(
+            'UPDATE TrainingSessions SET MemberID = NULL WHERE SessionID =$1 AND MemberID = $2', 
+            [sessionID, memberID]
+        );
+        
+        let availableSessions = await getAvailableSessions();
+        let trainers = await getTrainers();
+
+        res.render('MemberProfile', {Member: {memberid : memberID}, Trainers: trainers, AvailableSessions: availableSessions});
+        
+    } catch (error) {
+        console.error('Error scheduling training session:', error);
+        res.redirect(`/MemberProfile/${memberID}?scheduleError=${error.message}`);
+    }
+});
+
+// When rendering the TrainerProfile
+app.get('/TrainerProfile/:trainerID', async (req, res) => {
+    const trainerID = req.params.trainerID;
+    try {
+        // Fetch upcoming training sessions for this trainer
+        const upcomingSessions = await pool.query('SELECT * FROM TrainingSessions WHERE TrainerID = $1 AND SessionDate >= CURRENT_DATE AND (SELECT current_date) + (SELECT current_time) < sessiondate + sessiontime + duration ORDER BY SessionDate, SessionTime', [trainerID]);
+
+        // Fetch completed sessions for this trainer
+        const completedSessions = await pool.query('SELECT * FROM TrainingSessions WHERE trainerid = $1 AND (SELECT current_date) + (SELECT current_time) >= sessiondate + sessiontime + duration', [trainerID]);
+
+        // Render the TrainerProfile page with both sets of data
+        res.render('TrainerProfile', { trainerID: trainerID, upcomingSessions: upcomingSessions.rows, completedSessions: completedSessions.rows });
+    } catch (error) {
+        console.error('Error fetching training sessions:', error);
+        res.status(500).send('Server Error');
+    }
+});
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
