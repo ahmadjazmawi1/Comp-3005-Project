@@ -1,3 +1,10 @@
+Participants: 
+
+Ahmad Jazmawi  101199592
+Anis Tarfas 101187177 
+Karim Fouad 101244311
+
+
 Youtube video demonstration: 
 
 https://youtu.be/F_KmHueJZVw
@@ -17,7 +24,7 @@ Type "npm express-session"
 Type “npm install”
 Type “npm start”
 
-For the diagrams for 2.1 to 2.4, 
+
 
 The folder called 2.1-2.4 contains the diagram for Conceptual Design, Reduction to Relation Schemas, Normalization of Relation Schemas, Database Schema Diagram. Normalization, explanation of design, and assumptions are in the 3005_Project_report pdf file.
 
