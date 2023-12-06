@@ -169,7 +169,7 @@ app.post('/MemberRegister', async (req, res) => {
             req.session.userType = 'Member';
             req.session.userId = result.rows[0].memberid;
             // Redirect to the member profile page and pass the Member object to use it in pug file
-            res.render('memberProfile', { Member: result.rows[0] });
+            res.render('memberLogin');
         } else {
             console.log('Error retrieving registered user information');
         }

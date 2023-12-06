@@ -102,23 +102,4 @@ html
               td
                 a(href='/MemberProfile/' + member.memberid)= member.fname + ' ' + member.lname
 
-h1 Upcoming Training Sessions
-if UpcomingSessions && UpcomingSessions.length > 0
-  table
-    thead
-      tr
-        th Session ID
-        th Member ID
-        th Session Date
-        th Session Time
-        th Duration
-    tbody
-      each session in upcomingSessions
-        tr
-          td #{session.sessionID}
-          td #{session.MemberID}
-          td #{session.SessionDate.toLocaleDateString()}
-          td #{session.SessionTime}
-          td #{session.Duration}
-else
-  p No upcoming training sessions.
+

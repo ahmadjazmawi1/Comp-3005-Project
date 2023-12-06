@@ -75,7 +75,6 @@ CREATE TABLE Event (
 );
 
 CREATE TABLE GroupFitness(
-    EventID INT PRIMARY KEY,
     FitnessTopic VARCHAR(255) NOT NULL
 
 )INHERITS (Event);
