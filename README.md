@@ -34,4 +34,8 @@ The folder called SQL contains the ddl and dml statements. dml statements have m
 The pug files located in the Views folder are for the user interface
 Server.js contains the code that communicates with the database and the UI
 
-
+Bonus features: 
+* Inheritance in ER, Schema, and Database tables
+* We verify the structure of the email to make sure its valid
+* We used a cloud based postgreSQL hosting website to connect the project to so that all of us can connect to the database on different systems
+* Created a whole application (GUI) webpage interface for interaction between the system and the user 
