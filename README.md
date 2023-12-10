@@ -37,6 +37,5 @@ Files and Folders on Github:
 
 Bonus features: 
 * Inheritance in ER, Schema, and Database tables
-* We verify the structure of the email to make sure its valid
-* We used a cloud based postgreSQL hosting website to connect the project to so that all of us can connect to the database on different systems
+* We used a cloud based postgreSQL hosting website called elephantSQL to connect the project to so that all of us can connect to the database on different systems
 * Created a whole application (GUI) webpage interface for interaction between the system and the user 
