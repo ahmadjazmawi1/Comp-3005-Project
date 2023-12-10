@@ -15,7 +15,7 @@ INSTRUCTIONS TO RUN THE PROJECT:
 2. Download the Zip file off of github
 3. Unzip the folder
 4. Open it in an IDE
-5. Type the following:
+5. Type the following in a terminal where the file is downloaded:
 
 Type “npm install pg”
 Type "npm install pug"
