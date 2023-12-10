@@ -1,8 +1,8 @@
 Participants: 
 
-Ahmad Jazmawi  101199592
-Anis Tarfas 101187177 
-Karim Fouad 101244311
+* Ahmad Jazmawi  101199592
+* Anis Tarfas 101187177 
+* Karim Fouad 101244311
 
 
 Youtube video demonstration: 
